@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Webcam with OpenCV.js</title>
+    <link rel="stylesheet" href="styles.css" />
+
+    <!-- Load OpenCV.js from the official CDN -->
+    <script
+      async
+      src="https://docs.opencv.org/4.x/opencv.js"
+      type="text/javascript"
+      onload="onOpenCvReady();"
+    ></script>
+    <script
+      src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs"
+      type="module"
+    ></script>
+  </head>
+  <body>
+    <div id="loading-indicator">
+      <div class="loading-circle"></div>
+      <p>Loading...</p>
+    </div>
+    <video
+      id="webcam"
+      width="320px"
+      height="240px"
+      autoplay
+      playsinline
+    ></video>
+    <canvas id="outputCanvas" width="320px" height="240px"></canvas>
+
+    <!-- Fullscreen Lottie animation -->
+    <dotlottie-player
+      id="heartbeatAnimation"
+      src="https://lottie.host/0c5cf8bc-a8a8-4d40-84ce-d8efb3645fdf/ULtL98sFnX.json"
+      background="transparent"
+      speed="1"
+      loop
+      autoplay
+      style="
+        display: none;
+        width: 100vw;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 2;
+      "
+    ></dotlottie-player>
+
+    <div class="progress-box-1" style="display: none">
+      <div class="progress-indicator">
+        <div class="progress-circle" id="progress-circle">
+          <span class="progress-value" id="progress-value">0%</span>
+        </div>
+        <p>Completed</p>
+      </div>
+
+      <!-- Initially hidden, will be displayed on button click -->
+      <p id="scan-progress-message" style="display: none">Scan in Progress</p>
+      <div class="buttons-container">
+        <button class="start-scan-button" id="start-scan-button">
+          Start Scan
+        </button>
+        <button class="homepage-button" id="homepage-button">
+          Back to Homepage
+        </button>
+      </div>
+    </div>
+
+    <div class="progress-box-2">
+      <svg
+        width="100"
+        height="100"
+        viewBox="0 0 149 149"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M83.05 17.4984C83.05 8.05437 79.222 0.398438 74.5 0.398438C69.7779 0.398438 65.95 8.05437 65.95 17.4984C65.95 26.9425 69.7779 34.5984 74.5 34.5984C79.222 34.5984 83.05 26.9425 83.05 17.4984Z"
+          fill="#DC7D57"
+        />
+        <path
+          d="M110.405 29.4098C115.127 21.231 115.639 12.6868 111.55 10.3258C107.461 7.96476 100.318 12.681 95.5955 20.8598C90.8735 29.0386 90.3606 37.5828 94.45 39.9439C98.5394 42.3049 105.683 37.5886 110.405 29.4098Z"
+          fill="#DC7D57"
+        />
+        <path
+          d="M128.138 53.402C136.317 48.68 141.033 41.5369 138.672 37.4475C136.311 33.3581 127.767 33.8709 119.588 38.593C111.41 43.315 106.693 50.4581 109.054 54.5475C111.415 58.6369 119.96 58.124 128.138 53.402Z"
+          fill="#DC7D57"
+        />
+        <path
+          d="M131.5 83.0492C140.944 83.0492 148.6 79.2213 148.6 74.4992C148.6 69.7772 140.944 65.9492 131.5 65.9492C122.056 65.9492 114.4 69.7772 114.4 74.4992C114.4 79.2213 122.056 83.0492 131.5 83.0492Z"
+          fill="#DC7D57"
+        />
+        <path
+          d="M119.588 110.404C127.767 115.126 136.311 115.638 138.672 111.549C141.033 107.46 136.317 100.317 128.138 95.5945C119.959 90.8725 111.415 90.3596 109.054 94.449C106.693 98.5385 111.409 105.682 119.588 110.404Z"
+          fill="#DC7D57"
+        />
+        <path
+          d="M95.5953 128.135C100.317 136.314 107.46 141.031 111.55 138.67C115.639 136.309 115.126 127.764 110.404 119.585C105.682 111.407 98.5392 106.69 94.4498 109.051C90.3604 111.412 90.8733 119.957 95.5953 128.135Z"
+          fill="#DC7D57"
+        />
+        <path
+          d="M65.9505 131.498C65.9505 140.942 69.7785 148.598 74.5005 148.598C79.2226 148.598 83.0505 140.942 83.0505 131.498C83.0505 122.054 79.2226 114.398 74.5005 114.398C69.7785 114.398 65.9505 122.054 65.9505 131.498Z"
+          fill="#DC7D57"
+        />
+        <path
+          d="M38.5955 119.586C33.8734 127.765 33.3606 136.309 37.45 138.67C41.5394 141.031 48.6825 136.315 53.4045 128.136C58.1265 119.957 58.6394 111.413 54.55 109.052C50.4606 106.691 43.3175 111.407 38.5955 119.586Z"
+          fill="#DC7D57"
+        />
+        <path
+          d="M20.8616 95.5941C12.6828 100.316 7.96652 107.459 10.3275 111.549C12.6886 115.638 21.2328 115.125 29.4116 110.403C37.5904 105.681 42.3066 98.538 39.9456 94.4486C37.5846 90.3592 29.0404 90.8721 20.8616 95.5941Z"
+          fill="#DC7D57"
+        />
+        <path
+          d="M17.4999 65.9469C8.05583 65.9469 0.399902 69.7748 0.399902 74.4969C0.399902 79.2189 8.05583 83.0469 17.4999 83.0469C26.944 83.0469 34.5999 79.2189 34.5999 74.4969C34.5999 69.7748 26.944 65.9469 17.4999 65.9469Z"
+          fill="#DC7D57"
+        />
+        <path
+          d="M29.4115 38.5925C21.2327 33.8705 12.6885 33.3576 10.3275 37.447C7.96647 41.5364 12.6827 48.6795 20.8615 53.4016C29.0403 58.1236 37.5845 58.6364 39.9456 54.547C42.3066 50.4576 37.5903 43.3146 29.4115 38.5925Z"
+          fill="#DC7D57"
+        />
+        <path
+          d="M53.4044 20.8606C48.6824 12.6818 41.5393 7.96554 37.4499 10.3266C33.3605 12.6876 33.8734 21.2318 38.5954 29.4106C43.3174 37.5894 50.4605 42.3056 54.5499 39.9446C58.6393 37.5836 58.1265 29.0394 53.4044 20.8606Z"
+          fill="#DC7D57"
+        />
+      </svg>
+      <h4>Analysing Data</h4>
+      <p>
+        Hold tight, the measurement <br />
+        results are on the way
+      </p>
+    </div>
+    <div class="fps-box" id="fps-box" style="display: none">
+      <p id="fps-message">FPS: <span id="fps-value">0</span></p>
+      <span id="total-time-taken"></span>
+    </div>
+    <div id="error-dialog" style="display: none">
+      <div class="error-dialog-content">
+        <span id="error-dialog-close" class="error-dialog-close">&times;</span>
+        <p id="error-dialog-message"></p>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
