@@ -29,7 +29,9 @@ function startApp() {
   async function startWebcam() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: {
+          facingMode: { exact: "environment" }, // Request back camera
+        },
       });
       video.srcObject = stream;
 
@@ -197,11 +199,8 @@ function startApp() {
   startWebcam();
   function drawVideo() {
     if (!scanning) {
-      // Flip the canvas horizontally to fix the mirrored effect for display
-      ctx.save(); // Save the current state
-      ctx.scale(-1, 1); // Flip horizontally
-      ctx.drawImage(video, -video.width, 0, video.width, video.height); // Draw the flipped video
-      ctx.restore(); // Restore the original state
+      // No need to flip the canvas horizontally, so simply draw the video
+      ctx.drawImage(video, 0, 0, video.width, video.height);
     }
     requestAnimationFrame(drawVideo); // Keep rendering the video continuously
   }
@@ -237,11 +236,8 @@ function startApp() {
     if (frameCount % 2 === 0) {
       let src = new cv.Mat(video.height, video.width, cv.CV_8UC4);
 
-      // Apply the same flip during scanning
-      ctx.save(); // Save the current state
-      ctx.scale(-1, 1); // Flip horizontally
-      ctx.drawImage(video, -video.width, 0, video.width, video.height); // Draw the flipped video
-      ctx.restore(); // Restore the original state
+     // No flipping required, just draw the video as is
+     ctx.drawImage(video, 0, 0, video.width, video.height);
 
       let imageData = ctx.getImageData(0, 0, video.width, video.height);
       src.data.set(imageData.data);
