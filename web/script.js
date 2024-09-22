@@ -88,6 +88,10 @@ function startApp() {
     clearTimeout(scanTimeout); // Clear the timeout if the user manually stops
     clearInterval(progressInterval); // Stop the progress circle updates
     resetProgressCircle(); // Reset progress circle to 0%
+      // Send a message to Flutter to turn off the torch
+      if (window.FingerScanHandler) {
+        window.FingerScanHandler.postMessage("turnTorchOff");
+    }
     // Calculate the total time taken in seconds
     let endTime = performance.now();
     let totalTimeInSeconds = (endTime - startTime) / 1000;
